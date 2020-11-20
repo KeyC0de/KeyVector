@@ -177,4 +177,6 @@ int main()
 	{
 		std::cout << i.m_re << ' ' << i.m_im << '\n';
 	}
+
+	std::system( "pause" );
 }
