@@ -8,6 +8,7 @@
 #include <iterator>
 #include "custom_exception.h"
 
+
 //template<class T>
 //class Iterator;
 
@@ -802,19 +803,18 @@ public:
 	}
 
 	// prints all elements
-#if defined(_UNICODE) || defined(UNICODE)
 	template<typename J>
 	friend std::wostream& operator<<( std::wostream& stream,
 		const Vector<J>& v ) noexcept;
 
-	void print( std::wostream& stream = std::wcout ) const noexcept
+	void printW( std::wostream& stream = std::wcout ) const noexcept
 	{
 		for ( std::size_t i = 0; i < m_size; ++i )
 		{
 			stream << m_pdata[i] << L' ';
 		}
 	}
-#else
+
 	template<typename J>
 	friend std::ostream& operator<<( std::ostream& stream,
 		const Vector<J>& v ) noexcept;
@@ -826,14 +826,12 @@ public:
 			stream << m_pdata[i] << ' ';
 		}
 	}
-#endif
 
 	friend void swap( Vector<T>& lhs,
 		Vector<T>& rhs ) noexcept;
 };
 
 
-#if defined(_UNICODE) || defined(UNICODE)
 template<typename J>
 std::wostream& operator<<( std::wostream& stream,
 	const Vector<J>& v ) noexcept
@@ -843,7 +841,7 @@ std::wostream& operator<<( std::wostream& stream,
 		stream << v.m_pdata[i] << L' ';
 	}
 }
-#else
+
 template<typename J>
 std::ostream& operator<<( std::ostream& stream,
 	const Vector<J>& v ) noexcept
@@ -853,7 +851,6 @@ std::ostream& operator<<( std::ostream& stream,
 		stream << v.m_pdata[i] << ' ';
 	}
 }
-#endif
 
 // specialization of std::swap for the Vector class
 template <typename T>

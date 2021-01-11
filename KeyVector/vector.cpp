@@ -2,6 +2,7 @@
 #include <cassert>
 #include "vector.h"
 
+
 struct MyStruct
 {
 	int i;
@@ -41,10 +42,10 @@ int main()
 	assert(capacity == 64);
 	v.print();
 
-	Vector<std::wstring> v1(2);
+	Vector<std::string> v1(2);
 	assert(v1.getSize() == 0);
-	v1.pushBack(L"hi");
-	assert(v1[0] == L"hi");
+	v1.pushBack("hi");
+	assert(v1[0] == "hi");
 	assert(v1.getSize() == 1);
 	v1.print();
 
@@ -66,12 +67,12 @@ int main()
 	assert(v3.getCapacity() == 2);
 	assert(v3[0] == L"hello");
 	assert(v3[1] == L"hello");
-	v3.print();
+	v3.printW();
 	std::cout << '\n';
 	v3.resize(1);
 	assert(v3.getSize() == 1);
 	assert(v3[0] == L"hello");
-	v3.print();
+	v3.printW();
 	std::cout << '\n'
 		<< '\n';
 
@@ -92,12 +93,12 @@ int main()
 	assert(v4[0] == L"helloflower");
 	v3.popBack();
 	assert(v3.getSize() == 0);
-	v4.print();
+	v4.printW();
 	std::cout << '\n';
 
 	Vector<std::wstring> v5;
 	v5 = v4;
-	v5.print();
+	v5.printW();
 
 	Vector<int> v6(20, 9);
 	Vector<int>::iterator it = v6.begin();
@@ -158,13 +159,15 @@ int main()
 	{
 		float m_re;
 		float m_im;
-		Complex(float re, float im)
-			: m_re(re),
-			m_im(im)
+		Complex( float re,
+			float im )
+			:
+			m_re( re ),
+			m_im( im )
 		{}
 	};
 
-	Complex complexity{ 54.984, 98.356 };
+	Complex complexity{54.984, 98.356};
 	std::cout << "emplacing" << '\n';
 	Vector<Complex> v12;
 	v12.emplaceBack(543.87f, 890.341f);
@@ -173,10 +176,14 @@ int main()
 	v12.emplaceBack(543.87, 890.341);
 	v12.emplaceBack(543.87, 890.341);
 	v12.emplaceBack(903.1, 120.02f);
-	for (const auto &i : v12)
+	for ( const auto &i : v12 )
 	{
-		std::cout << i.m_re << ' ' << i.m_im << '\n';
+		std::cout << i.m_re
+			<< ' '
+			<< i.m_im
+			<< '\n';
 	}
 
 	std::system( "pause" );
+	return 0;
 }

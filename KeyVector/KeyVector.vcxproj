@@ -117,13 +117,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="check_for_leaks.cpp" />
+    <ClCompile Include="assertions.cpp" />
+    <ClCompile Include="leak_checker.cpp" />
     <ClCompile Include="vector.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="check_for_leaks.h" />
+    <ClInclude Include="assertions.h" />
+    <ClInclude Include="leak_checker.h" />
     <ClInclude Include="custom_exception.h" />
     <ClInclude Include="vector.h" />
+    <ClInclude Include="winner.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
