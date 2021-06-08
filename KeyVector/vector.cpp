@@ -146,10 +146,10 @@ int main()
 	v10.print();
 	std::cout << "yup\n";
 
-	Vector<MyStruct> v11(8, MyStruct{ 354 });
+	Vector<MyStruct> v11(8, MyStruct{354});
 	std::cout << "Size=" << v11.getSize() << '\n';
 	std::cout << "Capacity=" << v11.getCapacity() << '\n';
-	for (const auto &i : v11)
+	for ( const auto &i : v11 )
 	{
 		std::cout << i.i << '\n';
 	}

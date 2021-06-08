@@ -328,7 +328,7 @@ public:
 	};
 
 	using iterator		= T*;//Iterator<T>;	// There's an error if we use my custom Iterator as the default iterator
-	// Error C2664 'Vector<int,std::allocator<int>>::Vector(Vector<int,std::allocator<int>> &&) noexcept': cannot convert argument 1 from 'Vector<int,std::allocator<int>>::Iterator' to 'size_t'	vector	j : \nikosl91\documents\visual_studio_projects\vector\vector\vector.cpp	144
+	// Error C2664 'Vector<int,std::allocator<int>>::Vector(Vector<int,std::allocator<int>> &&) noexcept': cannot convert argument 1 from 'Vector<int,std::allocator<int>>::Iterator' to 'size_t'	vector	C : \Nikos\documents\visual_studio_projects\vector\vector\vector.cpp	144
 	using miterator		= std::move_iterator<iterator>;
 	using riterator		= std::reverse_iterator<iterator>;
 	using citerator		= ConstIterator;
@@ -509,9 +509,6 @@ public:
 	// destructor
 	~Vector()
 	{
-#ifdef _DEBUG
-		std::cout << "dtor" << '\n';
-#endif // _DEBUG
 		clear<T>();
 		Deleter deleter{};
 		std::unique_ptr<T, Deleter> deletesAtEndOfScope{ m_pdata, std::move( deleter ) };
@@ -525,9 +522,6 @@ public:
 		m_capacity{ rhs.m_capacity },
 		m_pdata{ static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) ) }
 	{
-#ifdef _DEBUG
-		std::cout << "cctor" << '\n';
-#endif // _DEBUG
 		try
 		{
 			for ( std::size_t i = 0; i < rhs.getCapacity(); ++i )
@@ -558,9 +552,6 @@ public:
 		m_capacity{ 0 },
 		m_pdata{ nullptr }
 	{
-#ifdef _DEBUG
-		std::cout << "mctor" << '\n';
-#endif
 		rhs.swap( *this );
 	}
 
