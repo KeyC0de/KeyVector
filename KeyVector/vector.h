@@ -1,16 +1,13 @@
 #pragma once
 
 #include <iostream>
-#include <limits>
 #include <type_traits>
 #include <string>
-#include <algorithm>
 #include <iterator>
+#include <algorithm>
+#include <execution>
 #include "custom_exception.h"
 
-
-//template<class T>
-//class Iterator;
 
 //============================================================
 //	\class	Vector<T, Alloc>
@@ -20,15 +17,14 @@
 //
 //	\brief	It is OK (and in fact preferable in C++) to use std::copy() instead of loops.
 //			pop_back() must destroy a buffer[size - 1] object.
-//			clear() must delete [] buffer.
+//			
 //			Edit: it must destroy everything in the buffer. The buffer itself may stay.
 //			All accessors (begin, end, front, back, operator[]) must have const 
 //				versions as well. ie. const T& front() const; , T& front();
 //			A choice of unsigned int for size parameters is questionable.
 //				A natural type for size is size_t
 //=============================================================
-template <class T,
-	class Alloc = std::allocator<T>>
+template <class T, class Alloc = std::allocator<T>>
 class Vector
 {
 	template<class T>
@@ -36,7 +32,7 @@ class Vector
 
 	std::size_t m_size;
 	std::size_t m_capacity;
-	T* m_pdata;
+	T* m_pData;
 public:
 	//using value_type = T;
 	//using size_type = std::size_t;
@@ -74,28 +70,30 @@ public:
 
 		Iterator()
 			:
-			v_{ nullptr },
-			m_index{ 0 }
-		{}
+			v_{nullptr},
+			m_index{0}
+		{
+			
+		}
 		Iterator( Vector* v_,
 			std::size_t index )
 			:
-			v_{ v_ },
-			m_index{ index }
-		{}
+			v_{v_},
+			m_index(index)
+		{
+		
+		}
 		Iterator( Vector& v_,
 			std::size_t index )
 			:
-			v_{ &v_ },
-			m_index{ index }
-		{}
-		// rule-of-0
-		//~Iterator() noexcept
-		//{
-		//	v_ = nullptr;
-		//}
+			v_{&v_},
+			m_index(index)
+		{
+		
+		}
 
-		operator std::size_t() noexcept {
+		operator std::size_t() noexcept
+		{
 			return m_index;
 		}
 
@@ -123,7 +121,7 @@ public:
 		{
 			return (*v_)[m_index + m];
 		}
-
+		
 		// pre-inc/dec
 		Iterator& operator++() noexcept
 		{
@@ -136,19 +134,19 @@ public:
 			return *this;
 		}
 		// post-inc/dec
-		Iterator operator++(int)
+		Iterator operator++( int )
 		{
-			Iterator r{ *this };
+			Iterator r{*this};
 			++m_index;
 			return r;
 		}
-		Iterator operator--(int)
+		Iterator operator--( int )
 		{
-			Iterator r{ *this };
+			Iterator r{*this};
 			--m_index;
 			return r;
 		}
-
+		
 		Iterator& operator+=( difference_type n ) noexcept
 		{
 			m_index += n;
@@ -159,18 +157,18 @@ public:
 			m_index -= n;
 			return *this;
 		}
-
+		
 		Iterator operator+( difference_type n ) const
 		{
-			Iterator r{ *this };
+			Iterator r{*this};
 			return r += n;
 		}
 		Iterator operator-( difference_type n ) const
 		{
-			Iterator r{ *this };
+			Iterator r{*this};
 			return r -= n;
 		}
-
+		
 		difference_type operator-( Iterator const& r ) const noexcept
 		{
 			return m_index - r.m_index;
@@ -216,30 +214,27 @@ public:
 
 		ConstIterator()
 			:
-			v_{ nullptr },
-			m_index{ 0 }
-		{}
+			v_{nullptr},
+			m_index{0}
+		{
+		
+		}
 		ConstIterator( Vector* v_,
 			std::size_t index )
 			:
-			v_{ v_ },
-			m_index{ index }
-		{}
+			v_{v_},
+			m_index(index)
+		{
+		
+		}
 		ConstIterator( Vector& v_,
 			std::size_t index )
 			:
-			v_{ &v_ },
-			m_index{ index }
-		{}
-		// rule-of-0
-		//~ConstIterator() noexcept
-		//{
-		//	v_ = nullptr;
-		//}
-
-		//operator pointer() const noexcept {
-		//	return &v_[m_index];
-		//}
+			v_{&v_},
+			m_index(index)
+		{
+		
+		}
 
 		const T& operator*()
 		{
@@ -253,7 +248,7 @@ public:
 		{
 			return (*v_)[m_index + m];
 		}
-
+		
 		// pre-inc/dec
 		ConstIterator& operator++() noexcept
 		{
@@ -266,69 +261,63 @@ public:
 			return *this;
 		}
 		// post-inc/dec
-		ConstIterator operator++(int)
+		ConstIterator operator++( int )
 		{
-			ConstIterator r{ *this };
+			ConstIterator r{*this};
 			++m_index;
 			return r;
 		}
-		ConstIterator operator--(int)
+		ConstIterator operator--( int )
 		{
-			ConstIterator r{ *this };
+			ConstIterator r{*this};
 			--m_index;
 			return r;
 		}
-
+		
 		ConstIterator operator+( difference_type n )
 		{
-			ConstIterator r{ *this };
+			ConstIterator r{*this};
 			return r += n;
 		}
 		ConstIterator operator-( difference_type n )
 		{
-			ConstIterator r{ *this };
+			ConstIterator r{*this};
 			return r -= n;
 		}
-
+		
 		difference_type operator-( ConstIterator const& r ) noexcept
 		{
 			return m_index - r.m_index;
 		}
-
+		
 		// comparisons
 		inline constexpr bool operator<( const ConstIterator& it )  const noexcept
 		{
 			return m_index < it.m_index;
 		}
-
 		inline constexpr bool operator<=( const ConstIterator& it ) const noexcept
 		{
 			return m_index <= it.m_index;
 		}
-
 		inline constexpr bool operator>( const ConstIterator& it )  const noexcept
 		{
 			return m_index > it.m_index;
 		}
-
 		inline constexpr bool operator>=( const ConstIterator& it ) const noexcept
 		{
 			return m_index >= it.m_index;
 		}
-
 		inline constexpr bool operator!=( const ConstIterator& it ) const noexcept
 		{
 			return m_index != it.m_index;
 		}
-
 		inline constexpr bool operator==( const ConstIterator& it ) const noexcept
 		{
 			return m_index == it.m_index;
 		}
 	};
 
-	using iterator		= T*;//Iterator<T>;	// There's an error if we use my custom Iterator as the default iterator
-	// Error C2664 'Vector<int,std::allocator<int>>::Vector(Vector<int,std::allocator<int>> &&) noexcept': cannot convert argument 1 from 'Vector<int,std::allocator<int>>::Iterator' to 'size_t'	vector	C : \Nikos\documents\visual_studio_projects\vector\vector\vector.cpp	144
+	using iterator		= T*;	// Iterator
 	using miterator		= std::move_iterator<iterator>;
 	using riterator		= std::reverse_iterator<iterator>;
 	using citerator		= ConstIterator;
@@ -336,8 +325,7 @@ public:
 	using rciterator	= std::reverse_iterator<citerator>;
 
 private:
-	std::size_t iteratorDistance( iterator first,
-		iterator last ) const noexcept
+	std::size_t iteratorDistance( iterator first, iterator last ) const noexcept
 	{
 		return std::abs( last - first );
 	}
@@ -350,7 +338,7 @@ private:
 		}
 	};
 
-	inline constexpr bool isInitializedIndex( std::size_t i ) const noexcept
+	constexpr bool isInitializedIndex( std::size_t i ) const noexcept
 	{
 		if ( i < m_size )
 		{
@@ -359,7 +347,7 @@ private:
 		return false;
 	}
 
-	inline constexpr bool isValidIndex( std::size_t i ) const noexcept
+	constexpr bool isValidIndex( std::size_t i ) const noexcept
 	{
 		if ( i < m_capacity )
 		{
@@ -367,26 +355,24 @@ private:
 		}
 		return false;
 	}
-
-	__forceinline bool needsRestructuring() const noexcept
+	bool needsRestructuring() const noexcept
 	{
 		return m_size == m_capacity;
 	}
 
 	template<typename U>
-	typename std::enable_if_t<
-		!( std::is_nothrow_copy_constructible_v<U> && std::is_nothrow_destructible_v<U> )
-	>
+	typename std::enable_if_t<!( std::is_nothrow_copy_constructible_v<U>
+		&& std::is_nothrow_destructible_v<U> )>
 		copyAssign( const Vector<U>& copy )
-	{// copy and swap
-		Vector<U> temp( copy );
+	{
+		// copy and swap
+		Vector<U> temp{copy};
 		temp.swap( *this );
 	}
 
 	template<typename U>
-	typename std::enable_if_t<
-		( std::is_nothrow_copy_constructible_v<U> && std::is_nothrow_destructible_v<U> )
-	>
+	typename std::enable_if_t<( std::is_nothrow_copy_constructible_v<U>
+		&& std::is_nothrow_destructible_v<U> )>
 		copyAssign( const Vector<U>& copy )
 	{
 		// self assignment check
@@ -400,87 +386,90 @@ private:
 			clear<T>();
 			for ( std::size_t i = 0; i < copy.getSize(); ++i )
 			{
-				selfMoveBack( std::move( copy[i] ) );
+				moveBackImpl( std::move( copy[i] ) );
 			}
 		}
 		// fallback to straight copying
 		else
 		{
-			Vector<T> temp( copy );
+			Vector<T> temp{copy};
 			temp.swap( *this );
 		}
 	}
 
-	// emplaces objects
-	void selfPushBack( const T& val )
+	void pushBackImpl( const T& val )
 	{
-		::new ( m_pdata + m_size ) T( val );
+		::new ( m_pData + m_size ) T{val};
 		++m_size;
 	}
-	void selfMoveBack( T&& val )
+	void moveBackImpl( T&& val )
 	{
-		::new ( m_pdata + m_size ) T( std::move( val ) );
+		::new ( m_pData + m_size ) T{std::move( val )};
 		++m_size;
 	}
 
 	template<typename U>
-	typename std::enable_if_t<!std::is_nothrow_move_constructible_v<U>>
-		selfCopyTo( Vector<U>& dest )
+	typename std::enable_if_t<!std::is_nothrow_copy_constructible_v<U>>
+		selfCopyTo( Vector<U>& other )
 	{
-		std::for_each( m_pdata,
-			m_pdata + m_size,
-			[&dest]( const T& srcVal )
+		std::for_each( m_pData,
+			m_pData + m_size,
+			[&other]( const T& srcVal )
 			{
-				dest.selfPushBack( srcVal );
+				other.pushBackImpl( srcVal );
 			}
 		);
 	}
 	template<typename U>
 	typename std::enable_if_t<std::is_nothrow_move_constructible_v<U>>
-		selfMoveTo( Vector<U>& dest )
+		selfMoveTo( Vector<U>& other )
 	{
-		std::for_each( m_pdata,
-			m_pdata + m_size,
-			[&dest]( T&& srcVal )
+		std::for_each( m_pData,
+			m_pData + m_size,
+			[&other]( T&& srcVal )
 			{
-				dest.selfMoveBack( std::move( srcVal ) );
+				other.moveBackImpl( std::move( srcVal ) );
 			}
 		);
 	}
 public:
-	// default constructor
+	// def ctor
 	Vector()
 		:
-		m_size{ 0 },
-		m_capacity{ 64 },
-		m_pdata{ static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) ) }
-	{}
-
-	// construct given capacity
+		m_size{0},
+		m_capacity{64},
+		m_pData{static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) )}
+	{
+	
+	}
 	explicit Vector( const std::size_t capacity )
 		:
-		m_size{ 0 },
-		m_capacity( capacity ),
-		m_pdata{ static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) ) }
-	{}
+		m_size{0},
+		m_capacity(capacity),
+		m_pData{static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) )}
+	{
+	
+	}
 
 	// constructor, setting default value to all elements
 	//template <typename T, typename = std::enable_if_t<!IsIterator<T>>>
-	explicit Vector( std::size_t capacity,
-		const T& value )
+	explicit Vector( std::size_t capacity, const T& value )
 		:
-		m_size{ 0 },
-		m_capacity( capacity ),
-		m_pdata{ static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) ) }
+		m_size{0},
+		m_capacity(capacity),
+		m_pData{static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) )}
 	{
-		//std::for_each(m_pdata, m_pdata + m_size, [this,&value](const T& itVal)
+		//std::for_each( std::execution::par_unseq,
+		//	&m_pData[0],
+		//	&m_pData[capacity],
+		//	[this, &value] ( const T& val )
 		//	{
-		//		this->selfPushBack(value);
-		//	}
-		//);
+		//		this->selfPushBack( value );
+		//	} );
+	
 		for ( std::size_t i = 0; i < m_capacity; ++i )
 		{
-			selfPushBack( value );
+			pushBackImpl( value );
 		}
 	}
 
@@ -489,13 +478,13 @@ public:
 	Vector( Iter* begin,
 		Iter* end )
 		:
-		m_size{ 0 },
-		m_capacity{ iteratorDistance( begin, end ) },
-		m_pdata{ static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) ) }
+		m_size{0},
+		m_capacity{iteratorDistance( begin, end )},
+		m_pData{static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) )}
 	{
 		for ( auto it = begin; it < end; ++it )
 		{
-			selfPushBack( *it );
+			pushBackImpl( *it );
 		}
 	}
 
@@ -503,58 +492,53 @@ public:
 	// construct from std::initializer_list
 	explicit Vector( std::initializer_list<T>& list )
 		:
-		Vector( std::begin( list ), std::end( list ) )
-	{}
-
-	// destructor
+		Vector{std::begin( list ), std::end( list )}
+	{
+	
+	}
 	~Vector()
 	{
 		clear<T>();
 		Deleter deleter{};
-		std::unique_ptr<T, Deleter> deletesAtEndOfScope{ m_pdata, std::move( deleter ) };
+		std::unique_ptr<T, Deleter> deletesAtEndOfScope{m_pData, std::move( deleter )};
 		//m_pdata = nullptr;
 	}
 
-	// copy constructor
 	Vector( const Vector& rhs )
 		:
-		m_size{ 0 },
-		m_capacity{ rhs.m_capacity },
-		m_pdata{ static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) ) }
+		m_size{0},
+		m_capacity{rhs.m_capacity},
+		m_pData{static_cast<T*>( ::operator new( sizeof( T ) * m_capacity ) )}
 	{
 		try
 		{
 			for ( std::size_t i = 0; i < rhs.getCapacity(); ++i )
 			{
-				selfPushBack( rhs.m_pdata[i] );
+				pushBackImpl( rhs.m_pData[i] );
 			}
 		}
-		catch (...) {
+		catch ( ... )
+		{
 			clear<T>();
-			std::unique_ptr<T, Deleter> deletesAtEndOfScope{ m_pdata, Deleter{} };
-			// or:
-			//::operator delete(m_pdata);
+			std::unique_ptr<T, Deleter> deletesAtEndOfScope{m_pData, Deleter{}};
 			throw;	// continue propagating the caught exception outside
 		}
 	}
-
 	// copy assignment operator
 	Vector& operator=( const Vector& rhs )
 	{
 		copyAssign( rhs );
 		return *this;
 	}
-
 	// move ctor
 	Vector( Vector&& rhs ) noexcept
 		:
-		m_size{ 0 },
-		m_capacity{ 0 },
-		m_pdata{ nullptr }
+		m_size{0},
+		m_capacity{0},
+		m_pData{nullptr}
 	{
 		rhs.swap( *this );
 	}
-
 	// move assignment operator
 	Vector& operator=( Vector&& rhs ) noexcept
 	{
@@ -566,17 +550,16 @@ public:
 	{
 		if ( newCapacity > m_capacity )
 		{
-			Vector<T> tmp( newCapacity );
+			Vector<T> tmp{newCapacity};
 			tmp.swap( *this );
 		}
 		// don't shrink otherwise
 	}
-
 	void swap( Vector& rhs ) noexcept
 	{
 		std::swap( m_size, rhs.m_size );
 		std::swap( m_capacity, rhs.m_capacity );
-		std::swap( m_pdata, rhs.m_pdata );
+		std::swap( m_pData, rhs.m_pData );
 	}
 
 	void pushBack( T&& val )
@@ -585,16 +568,15 @@ public:
 		{
 			resize( m_capacity << 1ull );
 		}
-		selfMoveBack( std::move( val ) );
+		moveBackImpl( std::move( val ) );
 	}
-
 	void pushBack( const T& val )
 	{
 		if ( needsRestructuring() )
 		{
 			resize( m_capacity << 1ull );
 		}
-		selfPushBack( val );
+		pushBackImpl( val );
 	}
 
 	template<typename... TArgs>
@@ -604,40 +586,39 @@ public:
 		{
 			resize( m_capacity << 1ull );
 		}
-		::new ( m_pdata + m_size ) T( std::forward<TArgs>( args )... );
+		::new ( m_pData + m_size ) T(std::forward<TArgs>( args )...);
 		++m_size;
 	}
 
 	void popBack() noexcept
 	{
 		--m_size;
-		m_pdata[m_size].~T();
+		m_pData[m_size].~T();
 	}
 
 	// restructuring / replacing vector in memory with a new one of different capacity
-	//	old values are retained
+	//	old values are retained - invalidates pointers/iterators
 	//	Complexity: O(n^2): worst case, O(n): average case
 	void resize( std::size_t newCapacity )
 	{
-		Vector<T> tmp( newCapacity );
+		Vector<T> tmp{newCapacity};
 		if ( newCapacity > m_size )
 		{
-			std::for_each( m_pdata,
-				m_pdata + m_size,
+			std::for_each( m_pData,
+				m_pData + m_size,
 				[&tmp]( const T& arg )
 				{
-					tmp.selfPushBack( arg );
+					tmp.pushBackImpl( arg );
 				}
 			);
 		}
-		else
-			if ( newCapacity < m_size )
+		else if ( newCapacity < m_size )
 		{
-			std::for_each( m_pdata,
-				m_pdata + newCapacity,
+			std::for_each( m_pData,
+				m_pData + newCapacity,
 				[&tmp]( const T& arg )
 				{
-					tmp.selfPushBack( arg );
+					tmp.pushBackImpl( arg );
 				}
 			);
 		}
@@ -648,6 +629,10 @@ public:
 		tmp.swap( *this );
 	}
 
+	//===================================================
+	//	\function	clear
+	//	\brief  clear() must delete[] buffer.
+	//	\date	20/10/2018 18:17
 	template<typename U>
 	typename std::enable_if_t<!std::is_trivially_constructible_v<U>>
 		clear() noexcept
@@ -655,67 +640,68 @@ public:
 		// destroy the elements in reverse order
 		for ( std::size_t i = m_size; i > 0; --i )
 		{
-			m_pdata[i - 1].~T();
+			m_pData[i - 1].~T();
 		}
 	}
 	// SFINAE optimization - no need to reallocate for builtins/pods - just copy over them
+	// trivially destructible objects can used without calling destructors
 	template<typename U>
 	typename std::enable_if_t<std::is_trivially_constructible_v<U>>
 		clear() noexcept
 	{
-		// trivially destructible objects can used without calling destructors
+
 	}
 
 	// forward
-	inline iterator begin() noexcept
+	iterator begin() noexcept
 	{
-		return &m_pdata[0];
+		return &m_pData[0];
 	}
-	inline iterator end() noexcept
+	iterator end() noexcept
 	{
-		return &m_pdata[m_size];	// or m_pdata + m_size
+		return &m_pData[m_size];	// or m_pdata + m_size
 	}
-	inline citerator cbegin() const noexcept
+	citerator cbegin() const noexcept
 	{
-		return &m_pdata[0];
+		return &m_pData[0];
 	}
-	inline citerator cend() const noexcept
+	citerator cend() const noexcept
 	{
-		return &m_pdata[m_size];
+		return &m_pData[m_size];
 	}
 	// reverse
-	inline riterator rbegin() noexcept
+	riterator rbegin() noexcept
 	{
-		return riterator{ end() };
+		return riterator{end()};
 	}
-	inline riterator rend() noexcept
+	riterator rend() noexcept
 	{
-		return riterator{ begin() };
+		return riterator{begin()};
 	}
-	inline rciterator crbegin() const noexcept
+	rciterator crbegin() const noexcept
 	{
-		return rciterator{ cend() };		// or rbegin()
+		return rciterator{cend()};		// or rbegin()
 	}
-	inline rciterator crend() const noexcept
+	rciterator crend() const noexcept
 	{
-		return rciterator{ cbegin() };	// or rend();
+		return rciterator{cbegin()};	// or rend();
 	}
 
 	T& front() noexcept
 	{
-		return m_pdata[0];
+		return m_pData[0];
 	}
 	const T& cfront() const noexcept
 	{
-		return m_pdata[0];
+		return m_pData[0];
 	}
 	T& back() noexcept
 	{
-		return m_pdata[m_size - 1];
+		return m_pData[m_size - 1];
 	}
 	const T& cback() const noexcept
 	{
-		return m_pdata[m_size - 1];
+		return m_pData[m_size - 1];
 	}
 
 	// Does it have any elements?
@@ -723,43 +709,36 @@ public:
 	{
 		return m_size > 0;
 	}
-	
 	inline bool operator==( const Vector& rhs ) const noexcept
 	{
-		return this->m_pdata == rhs.m_pdata;
+		return this->m_pData == rhs.m_pData;
 	}
-
 	inline bool operator!=( const Vector& rhs ) const noexcept
 	{
-		return this->m_pdata != rhs.m_pdata;
+		return this->m_pData != rhs.m_pData;
 	}
-
 	inline bool operator==( const Vector* rhs ) const noexcept
 	{
-		return this->m_pdata == rhs->m_pdata;
+		return this->m_pData == rhs->m_pData;
 	}
-
 	inline bool operator!=( const Vector* rhs ) const noexcept
 	{
-		return this->m_pdata != rhs->m_pdata;
+		return this->m_pData != rhs->m_pData;
 	}
-
 
 	T& operator[]( std::size_t index ) const
 	{
-		return m_pdata[index];
+		return m_pData[index];
 	}
 	T& operator[]( std::size_t index )
 	{
-		return m_pdata[index];
+		return m_pData[index];
 	}
-
-	// const & non-const versions are needed to satisfy every intent (get & set)
 	T& at( std::size_t index ) const
 	{
 		if ( isValidIndex( index ) )
 		{
-			return m_pdata[index];
+			return m_pData[index];
 		}
 		throwException( "Array out of bounds exception." );
 	}
@@ -767,27 +746,24 @@ public:
 	{
 		if ( isValidIndex( index ) )
 		{
-			return m_pdata[index];
+			return m_pData[index];
 		}
 		throwException( "Array out of bounds exception." );
 	}
-
 	bool isEmpty() const noexcept
 	{
 		return m_size == 0;
 	}
-
 	bool isFull() const noexcept
 	{
-		return m_size == std::numeric_limits<std::size_t>::max() - 1
-			? true : false;
+		return m_size == std::numeric_limits<std::size_t>::max() - 1 ?
+			true :
+			false;
 	}
-
 	std::size_t getSize() const noexcept
 	{
 		return m_size;
 	}
-
 	std::size_t getCapacity() const noexcept
 	{
 		return m_capacity;
@@ -798,23 +774,24 @@ public:
 	friend std::wostream& operator<<( std::wostream& stream,
 		const Vector<J>& v ) noexcept;
 
-	void printW( std::wostream& stream = std::wcout ) const noexcept
-	{
-		for ( std::size_t i = 0; i < m_size; ++i )
-		{
-			stream << m_pdata[i] << L' ';
-		}
-	}
-
 	template<typename J>
 	friend std::ostream& operator<<( std::ostream& stream,
 		const Vector<J>& v ) noexcept;
 
+	void printW( std::wostream& stream = std::wcout ) const noexcept
+	{
+		for ( std::size_t i = 0; i < m_size; ++i )
+		{
+			stream << m_pData[i]
+				<< L' ';
+		}
+	}
 	void print( std::ostream& stream = std::cout ) const noexcept
 	{
 		for ( std::size_t i = 0; i < m_size; ++i )
 		{
-			stream << m_pdata[i] << ' ';
+			stream << m_pData[i]
+				<< ' ';
 		}
 	}
 
@@ -829,7 +806,8 @@ std::wostream& operator<<( std::wostream& stream,
 {
 	for ( std::size_t i = 0; i < v.m_size; ++i )
 	{
-		stream << v.m_pdata[i] << L' ';
+		stream << v.m_pData[i]
+			<< L' ';
 	}
 }
 
@@ -839,7 +817,8 @@ std::ostream& operator<<( std::ostream& stream,
 {
 	for ( std::size_t i = 0; i < v.m_size; ++i )
 	{
-		stream << v.m_pdata[i] << ' ';
+		stream << v.m_pData[i]
+			<< ' ';
 	}
 }
 

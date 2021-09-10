@@ -119,13 +119,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="assertions.cpp" />
-    <ClCompile Include="leak_checker.cpp" />
-    <ClCompile Include="vector.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="assertions.h" />
-    <ClInclude Include="leak_checker.h" />
     <ClInclude Include="custom_exception.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="winner.h" />
