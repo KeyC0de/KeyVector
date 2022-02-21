@@ -22,13 +22,18 @@
 //			All accessors (begin, end, front, back, operator[]) must have const 
 //				versions as well. ie. const T& front() const; , T& front();
 //			A choice of unsigned int for size parameters is questionable.
-//				A natural type for size is size_t
+//				An ideal type for "size" is size_t
 //=============================================================
 template <class T, class Alloc = std::allocator<T>>
 class Vector
 {
 	template<class T>
 	friend class Iterator;
+	template<typename J>
+	friend std::wostream& operator<<( std::wostream& stream, const Vector<J>& v ) noexcept;
+	template<typename J>
+	friend std::ostream& operator<<( std::ostream& stream, const Vector<J>& v ) noexcept;
+	friend void swap( Vector<T>& lhs, Vector<T>& rhs ) noexcept;
 
 	std::size_t m_size;
 	std::size_t m_capacity;
@@ -55,7 +60,7 @@ public:
 
 	class Iterator final
 	{
-		Vector* v_;
+		Vector* m_v;
 		std::size_t m_index;
 	public:
 		using iterator_category = typename std::random_access_iterator_tag;
@@ -70,23 +75,23 @@ public:
 
 		Iterator()
 			:
-			v_{nullptr},
+			m_v{nullptr},
 			m_index{0}
 		{
 			
 		}
-		Iterator( Vector* v_,
+		Iterator( Vector* m_v,
 			std::size_t index )
 			:
-			v_{v_},
+			m_v{m_v},
 			m_index(index)
 		{
 		
 		}
-		Iterator( Vector& v_,
+		Iterator( Vector& m_v,
 			std::size_t index )
 			:
-			v_{&v_},
+			m_v{&m_v},
 			m_index(index)
 		{
 		
@@ -99,27 +104,27 @@ public:
 
 		T& operator*()
 		{
-			return (*v_)[m_index];
+			return (*m_v)[m_index];
 		}
 		const T& operator*() const
 		{
-			return (*v_)[m_index];
+			return (*m_v)[m_index];
 		}
 		T* operator->()
 		{
-			return &( (*v_)[m_index] );
+			return &( (*m_v)[m_index] );
 		}
 		const T* operator->() const
 		{
-			return &( (*v_)[m_index] );
+			return &( (*m_v)[m_index] );
 		}
 		T& operator[]( difference_type m )
 		{
-			return (*v_)[m_index + m];
+			return (*m_v)[m_index + m];
 		}
 		const T& operator[]( difference_type m ) const
 		{
-			return (*v_)[m_index + m];
+			return (*m_v)[m_index + m];
 		}
 		
 		// pre-inc/dec
@@ -203,7 +208,7 @@ public:
 
 	class ConstIterator final
 	{
-		const Vector* v_;
+		const Vector* m_v;
 		std::size_t m_index;
 	public:
 		using iterator_category	= typename std::random_access_iterator_tag;
@@ -214,23 +219,23 @@ public:
 
 		ConstIterator()
 			:
-			v_{nullptr},
+			m_v{nullptr},
 			m_index{0}
 		{
 		
 		}
-		ConstIterator( Vector* v_,
+		ConstIterator( Vector* m_v,
 			std::size_t index )
 			:
-			v_{v_},
+			m_v{m_v},
 			m_index(index)
 		{
 		
 		}
-		ConstIterator( Vector& v_,
+		ConstIterator( Vector& m_v,
 			std::size_t index )
 			:
-			v_{&v_},
+			m_v{&m_v},
 			m_index(index)
 		{
 		
@@ -238,15 +243,15 @@ public:
 
 		const T& operator*()
 		{
-			return (*v_)[m_index];
+			return (*m_v)[m_index];
 		}
 		const T* operator->()
 		{
-			return &( (*v_)[m_index] );
+			return &( (*m_v)[m_index] );
 		}
 		const T& operator[]( difference_type m )
 		{
-			return (*v_)[m_index + m];
+			return (*m_v)[m_index + m];
 		}
 		
 		// pre-inc/dec
@@ -355,6 +360,7 @@ private:
 		}
 		return false;
 	}
+
 	bool needsRestructuring() const noexcept
 	{
 		return m_size == m_capacity;
@@ -453,7 +459,8 @@ public:
 
 	// constructor, setting default value to all elements
 	//template <typename T, typename = std::enable_if_t<!IsIterator<T>>>
-	explicit Vector( std::size_t capacity, const T& value )
+	explicit Vector( std::size_t capacity,
+		const T& value )
 		:
 		m_size{0},
 		m_capacity(capacity),
@@ -496,6 +503,7 @@ public:
 	{
 	
 	}
+
 	~Vector()
 	{
 		clear<T>();
@@ -524,13 +532,13 @@ public:
 			throw;	// continue propagating the caught exception outside
 		}
 	}
-	// copy assignment operator
+
 	Vector& operator=( const Vector& rhs )
 	{
 		copyAssign( rhs );
 		return *this;
 	}
-	// move ctor
+	
 	Vector( Vector&& rhs ) noexcept
 		:
 		m_size{0},
@@ -539,7 +547,7 @@ public:
 	{
 		rhs.swap( *this );
 	}
-	// move assignment operator
+
 	Vector& operator=( Vector&& rhs ) noexcept
 	{
 		rhs.swap( *this );
@@ -555,6 +563,7 @@ public:
 		}
 		// don't shrink otherwise
 	}
+
 	void swap( Vector& rhs ) noexcept
 	{
 		std::swap( m_size, rhs.m_size );
@@ -680,11 +689,11 @@ public:
 	}
 	rciterator crbegin() const noexcept
 	{
-		return rciterator{cend()};		// or rbegin()
+		return rciterator{cend()};
 	}
 	rciterator crend() const noexcept
 	{
-		return rciterator{cbegin()};	// or rend();
+		return rciterator{cbegin()};
 	}
 
 	T& front() noexcept
@@ -769,15 +778,6 @@ public:
 		return m_capacity;
 	}
 
-	// prints all elements
-	template<typename J>
-	friend std::wostream& operator<<( std::wostream& stream,
-		const Vector<J>& v ) noexcept;
-
-	template<typename J>
-	friend std::ostream& operator<<( std::ostream& stream,
-		const Vector<J>& v ) noexcept;
-
 	void printW( std::wostream& stream = std::wcout ) const noexcept
 	{
 		for ( std::size_t i = 0; i < m_size; ++i )
@@ -794,9 +794,6 @@ public:
 				<< ' ';
 		}
 	}
-
-	friend void swap( Vector<T>& lhs,
-		Vector<T>& rhs ) noexcept;
 };
 
 
